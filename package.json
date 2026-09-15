@@ -1,0 +1,10 @@
+{
+  "name": "home-page-image",
+  "private": true,
+  "scripts": {
+    "dev": "npm --prefix eduqosun-teacher-panel run dev",
+    "build": "npm --prefix eduqosun-teacher-panel run build",
+    "preview": "npm --prefix eduqosun-teacher-panel run preview",
+    "typecheck": "npm --prefix eduqosun-teacher-panel run typecheck"
+  }
+}
