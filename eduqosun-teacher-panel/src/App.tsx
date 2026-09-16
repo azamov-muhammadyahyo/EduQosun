@@ -1,52 +1,89 @@
-import { useEffect, useState } from 'react'
-import { ThemeProvider } from './context/ThemeContext'
+import { Suspense, useEffect } from 'react'
+import { ErrorBoundary } from './app/ErrorBoundary'
+import { GlobalHotkeys } from './app/GlobalHotkeys'
+import { PageSkeleton } from './app/PageSkeleton'
+import { pages } from './app/pages'
 import { DashboardLayout } from './components/layout/DashboardLayout'
-import { Dashboard } from './pages/Dashboard'
-import { Lessons } from './pages/Lessons'
-import { Placeholder } from './pages/Placeholder'
+import { AlertsWatcher } from './components/overlays/AlertsWatcher'
+import { CommandPalette } from './components/overlays/CommandPalette'
+import { ConfirmHost } from './components/overlays/ConfirmHost'
+import { OverlayHost } from './components/overlays/OverlayHost'
+import { Toaster } from './components/overlays/Toaster'
+import { FloatingTimer, TimerWatcher } from './components/tools/TimerWidget'
+import { ThemeProvider } from './context/ThemeContext'
+import { navItemOf } from './data/navigation'
+import { LoginPage } from './pages/LoginPage'
+import { NotFoundPage } from './pages/NotFoundPage'
+import { useRoute } from './router'
+import { useApp } from './store/appStore'
+import { closeDrawer, closeModal } from './store/uiStore'
 
-/** URL hash'idan boshlang'ich sahifani o'qiydi (masalan, #lessons) */
-function getPageFromHash(): string {
-  if (typeof window === 'undefined') return 'home'
-  return window.location.hash.replace('#', '') || 'home'
-}
+function ActivePage() {
+  const { page } = useRoute()
 
-function renderPage(page: string) {
-  switch (page) {
-    case 'home':
-      return <Dashboard />
-    case 'lessons':
-      return <Lessons />
-    default:
-      return <Placeholder pageId={page} />
-  }
-}
-
-export default function App() {
-  const [page, setPage] = useState<string>(getPageFromHash)
-
-  // Brauzerning "orqaga/oldinga" tugmalari ishlashi uchun
+  // Brauzer sarlavhasi joriy bo'limni ko'rsatadi
   useEffect(() => {
-    const handleHashChange = () => setPage(getPageFromHash())
-    window.addEventListener('hashchange', handleHashChange)
-    return () => window.removeEventListener('hashchange', handleHashChange)
-  }, [])
+    const label = page === 'not-found' ? 'Sahifa topilmadi' : navItemOf(page).label
+    document.title = `${label} · EduQosun`
+  }, [page])
 
-  const handleNavigate = (id: string) => {
-    setPage(id)
-    try {
-      window.location.hash = id
-    } catch {
-      /* hash o'rnatib bo'lmasa ham sahifa almashadi */
-    }
-    window.scrollTo({ top: 0, behavior: 'smooth' })
+  // Sahifa almashganda ochiq oynalar yopiladi
+  useEffect(() => {
+    closeDrawer()
+    closeModal()
+  }, [page])
+
+  if (page === 'not-found') return <NotFoundPage />
+  const Page = pages[page]
+  return (
+    // `key` — sahifa almashganda xatolik holati ham yangilanadi
+    <ErrorBoundary key={page}>
+      <Suspense fallback={<PageSkeleton />}>
+        <Page />
+      </Suspense>
+    </ErrorBoundary>
+  )
+}
+
+function Shell() {
+  const { page } = useRoute()
+  const loggedIn = useApp((s) => s.session.loggedIn)
+  const reduceMotion = useApp((s) => s.settings.reduceMotion)
+
+  useEffect(() => {
+    document.documentElement.classList.toggle('reduce-motion', reduceMotion)
+  }, [reduceMotion])
+
+  if (!loggedIn) {
+    return (
+      <>
+        <LoginPage />
+        <Toaster />
+      </>
+    )
   }
 
   return (
-    <ThemeProvider>
-      <DashboardLayout currentPage={page} onNavigate={handleNavigate}>
-        {renderPage(page)}
+    <>
+      <DashboardLayout currentPage={page}>
+        <ActivePage />
       </DashboardLayout>
+      <OverlayHost />
+      <CommandPalette />
+      <ConfirmHost />
+      <Toaster />
+      <FloatingTimer />
+      <TimerWatcher />
+      <AlertsWatcher />
+      <GlobalHotkeys />
+    </>
+  )
+}
+
+export default function App() {
+  return (
+    <ThemeProvider>
+      <Shell />
     </ThemeProvider>
   )
 }

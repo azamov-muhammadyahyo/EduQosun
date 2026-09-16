@@ -1,82 +1,55 @@
-import { Bell, ChevronDown, Menu, Moon, Search, Sun } from 'lucide-react'
+import { Menu as MenuIcon, Moon, Search, Sun } from 'lucide-react'
 import { useTheme } from '../../context/ThemeContext'
-import { teacher } from '../../data/teacher'
-import { Avatar } from '../ui/Avatar'
+import { openPalette, setSidebarOpen } from '../../store/uiStore'
+import { IconButton } from '../ui/IconButton'
+import { Kbd } from '../ui/Misc'
+import { ProfileMenu, ToolsMenu } from './topbar/AccountMenus'
+import { CurrentLessonPill } from './topbar/CurrentLessonPill'
+import { NotificationsMenu } from './topbar/NotificationsMenu'
 
-interface TopbarProps {
-  onMenuClick: () => void
-}
-
-export function Topbar({ onMenuClick }: TopbarProps) {
+export function Topbar() {
   const { theme, toggleTheme } = useTheme()
 
   return (
-    <header className="sticky top-0 z-30 flex h-16 items-center gap-2 border-b border-slate-200 bg-white/80 px-4 backdrop-blur-md dark:border-slate-700/60 dark:bg-slate-900/80 sm:gap-3 sm:px-6 lg:px-8">
-      {/* Mobil menyu tugmasi */}
-      <button
-        type="button"
-        onClick={onMenuClick}
-        className="rounded-lg p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-slate-800 lg:hidden"
-        aria-label="Menyuni ochish"
-      >
-        <Menu className="h-5 w-5" aria-hidden="true" />
-      </button>
-
-      {/* Qidiruv */}
-      <div className="relative min-w-0 flex-1 sm:max-w-md lg:max-w-xl">
-        <Search
-          className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"
-          aria-hidden="true"
+    <header className="print-hidden sticky top-0 z-30 border-b border-slate-200/80 bg-white/85 backdrop-blur-md dark:border-slate-700/60 dark:bg-slate-900/85">
+      <div className="mx-auto flex h-[68px] max-w-[1680px] items-center gap-2 px-4 sm:gap-3 sm:px-6">
+        <IconButton
+          icon={MenuIcon}
+          label="Menyuni ochish"
+          size="md"
+          className="lg:hidden"
+          onClick={() => setSidebarOpen(true)}
         />
-        <input
-          type="search"
-          aria-label="Qidiruv"
-          placeholder="O'quvchi, guruh yoki darsni qidirish..."
-          className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 pl-10 pr-16 text-sm text-slate-700 transition-colors placeholder:text-slate-400 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:placeholder:text-slate-500"
-        />
-        <kbd className="pointer-events-none absolute right-2.5 top-1/2 hidden -translate-y-1/2 items-center gap-1 rounded-md border border-slate-200 bg-white px-1.5 py-0.5 text-[11px] font-medium text-slate-400 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-300 sm:inline-flex">
-          Ctrl + K
-        </kbd>
-      </div>
 
-      {/* O'ng taraf */}
-      <div className="ml-auto flex items-center gap-1 sm:gap-2">
+        {/* Qidiruv — bosilganda buyruqlar paneli ochiladi (Ctrl + K) */}
         <button
           type="button"
-          className="relative rounded-lg p-2 text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-slate-800"
-          aria-label="Bildirishnomalar, o'qilmagan xabar bor"
+          onClick={openPalette}
+          className="group flex h-11 min-w-0 flex-1 items-center gap-3 rounded-xl border border-slate-200 bg-white px-3.5 text-left text-sm text-slate-400 shadow-sm transition-colors hover:border-slate-300 dark:border-slate-700 dark:bg-slate-800 dark:hover:border-slate-600 sm:max-w-md xl:max-w-lg 2xl:max-w-xl"
+          aria-label="Qidiruv (Ctrl + K)"
         >
-          <Bell className="h-5 w-5" aria-hidden="true" />
-          <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-rose-500 ring-2 ring-white dark:ring-slate-900" />
-        </button>
-
-        <button
-          type="button"
-          onClick={toggleTheme}
-          className="rounded-lg p-2 text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-slate-800"
-          aria-label={theme === 'dark' ? 'Kunduzgi rejimga o‘tish' : 'Tungi rejimga o‘tish'}
-        >
-          {theme === 'dark' ? (
-            <Sun className="h-5 w-5" aria-hidden="true" />
-          ) : (
-            <Moon className="h-5 w-5" aria-hidden="true" />
-          )}
-        </button>
-
-        <button
-          type="button"
-          className="flex items-center gap-2 rounded-xl p-1 pr-2 transition-colors hover:bg-slate-100 dark:hover:bg-slate-800"
-          aria-label="Profil menyusi"
-        >
-          <Avatar initials={teacher.initials} color="blue" size="sm" />
-          <span className="hidden text-left leading-tight sm:block">
-            <span className="block text-sm font-semibold text-slate-800 dark:text-slate-100">
-              {teacher.fullName}
-            </span>
-            <span className="block text-xs text-slate-500 dark:text-slate-400">{teacher.role}</span>
+          <Search className="h-4 w-4 shrink-0 text-slate-400 group-hover:text-slate-500" aria-hidden="true" />
+          <span className="flex-1 truncate">O'quvchi, guruh yoki darsni qidirish...</span>
+          <span className="hidden items-center gap-1 sm:flex">
+            <Kbd>Ctrl</Kbd>
+            <span className="text-[11px] text-slate-400">+</span>
+            <Kbd>K</Kbd>
           </span>
-          <ChevronDown className="hidden h-4 w-4 text-slate-400 sm:block" aria-hidden="true" />
         </button>
+
+        <div className="ml-auto flex shrink-0 items-center gap-1 sm:gap-1.5">
+          <CurrentLessonPill className="mr-2 hidden max-w-[300px] xl:inline-flex" />
+          <ToolsMenu />
+          <NotificationsMenu />
+          <IconButton
+            icon={theme === 'dark' ? Sun : Moon}
+            label={theme === 'dark' ? "Kunduzgi rejimga o'tish" : "Tungi rejimga o'tish"}
+            size="md"
+            onClick={toggleTheme}
+          />
+          <div className="mx-1 hidden h-8 w-px bg-slate-200 dark:bg-slate-700 sm:block" aria-hidden="true" />
+          <ProfileMenu />
+        </div>
       </div>
     </header>
   )
