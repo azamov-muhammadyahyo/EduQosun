@@ -21,6 +21,7 @@ import { SearchInput, Select } from '../components/ui/Form'
 import { MetricCard } from '../components/ui/MetricCard'
 import { PageHeader } from '../components/ui/PageHeader'
 import { FilterPills } from '../components/ui/Tabs'
+import { useStickyRail } from '../hooks/useDom'
 
 type StatusFilter = TestStatus | 'all'
 
@@ -30,6 +31,7 @@ const statuses: StatusFilter[] = ['all', 'published', 'draft', 'finished']
 const statusRank: Record<TestStatus, number> = { published: 0, draft: 1, finished: 2 }
 
 export function TestsPage() {
+  const railRef = useStickyRail()
   const tests = useApp((s) => s.tests)
   const students = useApp((s) => s.students)
   const groupMap = useGroupMap()
@@ -150,7 +152,7 @@ export function TestsPage() {
         </Card>
       </div>
 
-      <aside aria-label="Testlar tahlili">
+      <aside ref={railRef} className="xl:sticky-rail" aria-label="Testlar tahlili">
         <TestsInsights tests={groupTests} studentMap={studentMap} groupMap={groupMap} />
       </aside>
     </div>

@@ -1,17 +1,15 @@
-import { useMemo, useState } from 'react'
-import { X } from 'lucide-react'
+import { useMemo, useState, type ReactNode } from 'react'
+import { GraduationCap, Sparkles, X } from 'lucide-react'
 import type { NavItem, PageId } from '../../types'
 import { primaryNav, secondaryNav } from '../../data/navigation'
-import { quotes } from '../../data/catalog'
+import { sidebarQuotes } from '../../data/catalog'
 import { cn } from '../../lib/cn'
-import { todayKey } from '../../lib/date'
 import { navigateTo } from '../../router'
 import { useApp } from '../../store/appStore'
 import { updateSettings } from '../../store/actions/account'
 import { useClock } from '../../store/clock'
 import { selectUnreadMessages } from '../../store/selectors'
 import { setSidebarOpen, useUI } from '../../store/uiStore'
-import { BrandName, PlantIllustration } from '../brand/Brand'
 
 interface SidebarProps {
   currentPage: PageId | 'not-found'
@@ -23,6 +21,12 @@ interface NavLinkProps {
   badge?: { value: number; tone: 'rose' | 'amber' }
 }
 
+/**
+ * Menyu qatori:
+ *  - oddiy holat — kulrang ikonka va matn
+ *  - ustiga borganda — och kulrang fon, to'q matn
+ *  - aktiv — och ko'k fon, chap tomonda ko'k chiziq, ko'k ikonka
+ */
 function NavLink({ item, active, badge }: NavLinkProps) {
   const Icon = item.icon
   return (
@@ -36,15 +40,26 @@ function NavLink({ item, active, badge }: NavLinkProps) {
         }}
         aria-current={active ? 'page' : undefined}
         className={cn(
-          'group flex items-center gap-3 rounded-xl px-3 py-2.5 text-[14px] font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400',
+          'group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-[14px] transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60',
           active
-            ? 'bg-blue-600 text-white shadow-md shadow-blue-950/40'
-            : 'text-slate-300 hover:bg-white/[0.06] hover:text-white',
+            ? 'bg-blue-50 font-semibold text-slate-900 dark:bg-blue-500/15 dark:text-white'
+            : 'font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100',
         )}
       >
+        {/* Aktiv bo'lim belgisi — band ichida, chap chetiga yopishgan ko'k chiziq */}
+        <span
+          className={cn(
+            'absolute inset-y-2.5 left-0 w-[3px] rounded-r-full bg-blue-600 transition-all duration-200 dark:bg-blue-400',
+            active ? 'opacity-100' : 'scale-y-0 opacity-0',
+          )}
+          aria-hidden="true"
+        />
         <Icon
-          className={cn('h-5 w-5 shrink-0', active ? 'text-white' : 'text-slate-400 group-hover:text-white')}
-          strokeWidth={1.9}
+          className={cn(
+            'h-5 w-5 shrink-0 transition-colors',
+            active ? 'text-blue-600 dark:text-blue-400' : 'text-slate-400 group-hover:text-slate-700 dark:text-slate-500 dark:group-hover:text-slate-200',
+          )}
+          strokeWidth={1.8}
           aria-hidden="true"
         />
         <span className="flex-1 truncate">{item.label}</span>
@@ -52,7 +67,9 @@ function NavLink({ item, active, badge }: NavLinkProps) {
           <span
             className={cn(
               'inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-[11px] font-bold tabular-nums',
-              active ? 'bg-white text-blue-700' : badge.tone === 'rose' ? 'bg-rose-500 text-white' : 'bg-amber-400 text-amber-950',
+              badge.tone === 'rose'
+                ? 'bg-rose-500 text-white'
+                : 'bg-amber-100 text-amber-700 ring-1 ring-inset ring-amber-200 dark:bg-amber-500/15 dark:text-amber-300 dark:ring-amber-500/30',
             )}
           >
             {badge.value > 99 ? '99+' : badge.value}
@@ -63,34 +80,65 @@ function NavLink({ item, active, badge }: NavLinkProps) {
   )
 }
 
-function PromoCard() {
+function SectionLabel({ children }: { children: ReactNode }) {
+  return (
+    <p className="mb-2 mt-1 px-3 text-[11px] font-semibold uppercase tracking-[0.08em] text-slate-400 dark:text-slate-500">
+      {children}
+    </p>
+  )
+}
+
+/** Logotip: ko'k plitka ichida bitiruvchi qalpog'i */
+function SidebarBrand() {
+  return (
+    <a
+      href="#home"
+      onClick={(event) => {
+        event.preventDefault()
+        navigateTo('home')
+        setSidebarOpen(false)
+      }}
+      className="flex min-w-0 flex-1 items-center gap-3 rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60"
+    >
+      <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-blue-700 text-white shadow-md shadow-blue-600/25">
+        <GraduationCap className="h-5 w-5" strokeWidth={2} aria-hidden="true" />
+      </span>
+      <span className="min-w-0 leading-tight">
+        <span className="block truncate text-[17px] font-bold tracking-tight text-slate-900 dark:text-white">EduQosun</span>
+        <span className="block truncate text-[11px] text-slate-500 dark:text-slate-400">Ta'lim – kelajak kaliti</span>
+      </span>
+    </a>
+  )
+}
+
+/** Pastdagi iqtibos kartasi: bosilsa keyingi iqtibos, "×" — yashirish */
+function QuoteCard() {
   const visible = useApp((s) => s.settings.showPromo)
-  // Har kuni boshqa iqtibos; bosilganda keyingisiga o'tadi
-  const [offset, setOffset] = useState(0)
-  const dayIndex = useMemo(() => Number(todayKey().slice(8, 10)), [])
+  const [index, setIndex] = useState(0)
   if (!visible) return null
-  const quote = quotes[(dayIndex + offset) % quotes.length]
+  const quote = sidebarQuotes[index % sidebarQuotes.length]
 
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-navy-800 to-navy-850 p-4 pr-16">
+    <div className="group relative rounded-xl border border-slate-200 bg-slate-50 p-3.5 dark:border-slate-800 dark:bg-slate-800/60">
       <button
         type="button"
         onClick={() => updateSettings({ showPromo: false })}
-        className="absolute right-2 top-2 z-10 rounded-md p-1 text-slate-500 transition-colors hover:bg-white/10 hover:text-white"
-        aria-label="Kartochkani yopish"
+        className="absolute right-1.5 top-1.5 rounded-md p-1 text-slate-400 opacity-0 transition hover:bg-slate-200 hover:text-slate-700 focus-visible:opacity-100 group-hover:opacity-100 dark:hover:bg-slate-700 dark:hover:text-slate-200"
+        aria-label="Iqtibosni yashirish"
       >
         <X className="h-3.5 w-3.5" aria-hidden="true" />
       </button>
+      <span className="inline-flex h-7 w-7 items-center justify-center rounded-lg bg-blue-100 text-blue-600 dark:bg-blue-500/15 dark:text-blue-400">
+        <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
+      </span>
       <button
         type="button"
-        onClick={() => setOffset((value) => value + 1)}
-        className="text-left"
+        onClick={() => setIndex((value) => value + 1)}
+        className="mt-2 block pr-3 text-left text-[13px] font-medium leading-snug text-slate-700 transition-colors hover:text-blue-700 dark:text-slate-300 dark:hover:text-blue-300"
         title="Keyingi iqtibos"
       >
-        <p className="text-sm font-semibold leading-snug text-white">{quote.title}</p>
-        <p className="mt-1.5 text-[11px] leading-relaxed text-slate-400">{quote.subtitle}</p>
+        {quote}
       </button>
-      <PlantIllustration className="pointer-events-none absolute -bottom-1 right-2 h-20 w-14" />
     </div>
   )
 }
@@ -100,10 +148,7 @@ export function Sidebar({ currentPage }: SidebarProps) {
   const unread = useApp(selectUnreadMessages)
   const reminders = useApp((s) => s.reminders)
   const { today } = useClock()
-  const dueReminders = useMemo(
-    () => reminders.filter((r) => !r.done && r.date <= today).length,
-    [reminders, today],
-  )
+  const dueReminders = useMemo(() => reminders.filter((r) => !r.done && r.date <= today).length, [reminders, today])
 
   const badges: Partial<Record<PageId, NavLinkProps['badge']>> = {
     messages: { value: unread, tone: 'rose' },
@@ -115,7 +160,7 @@ export function Sidebar({ currentPage }: SidebarProps) {
       {/* Mobil overlay */}
       <div
         className={cn(
-          'print-hidden fixed inset-0 z-40 bg-slate-950/60 backdrop-blur-sm transition-opacity lg:hidden',
+          'print-hidden fixed inset-0 z-40 bg-slate-950/50 backdrop-blur-sm transition-opacity lg:hidden',
           open ? 'opacity-100' : 'pointer-events-none opacity-0',
         )}
         onClick={() => setSidebarOpen(false)}
@@ -124,42 +169,34 @@ export function Sidebar({ currentPage }: SidebarProps) {
 
       <aside
         className={cn(
-          'print-hidden fixed inset-y-0 left-0 z-50 flex w-60 flex-col bg-gradient-to-b from-navy-900 via-navy-900 to-navy-950 transition-transform duration-300 ease-out lg:translate-x-0',
-          open ? 'translate-x-0' : '-translate-x-full',
+          'print-hidden fixed inset-y-0 left-0 z-50 flex w-60 flex-col border-r border-slate-200/80 bg-white transition-transform duration-300 ease-out dark:border-slate-800 dark:bg-slate-900 lg:translate-x-0',
+          open ? 'translate-x-0 shadow-2xl' : '-translate-x-full',
         )}
         aria-label="Asosiy navigatsiya"
       >
-        <div className="flex items-center gap-2 px-4 pb-4 pt-5">
-          <a
-            href="#home"
-            onClick={(event) => {
-              event.preventDefault()
-              navigateTo('home')
-              setSidebarOpen(false)
-            }}
-            className="min-w-0 flex-1 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
-          >
-            <BrandName inverted />
-          </a>
+        <div className="flex h-[68px] shrink-0 items-center gap-2 border-b border-slate-100 pl-5 pr-4 dark:border-slate-800">
+          <SidebarBrand />
           <button
             type="button"
             onClick={() => setSidebarOpen(false)}
-            className="rounded-lg p-1.5 text-slate-400 hover:bg-white/10 hover:text-white lg:hidden"
+            className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-800 dark:hover:text-slate-200 lg:hidden"
             aria-label="Menyuni yopish"
           >
             <X className="h-5 w-5" aria-hidden="true" />
           </button>
         </div>
 
-        <nav className="scrollbar-navy flex-1 overflow-y-auto px-3 py-1">
+        <nav className="scrollbar-thin flex-1 overflow-y-auto pl-5 pr-3 py-5">
+          <SectionLabel>Umumiy</SectionLabel>
           <ul className="space-y-1">
             {primaryNav.map((item) => (
               <NavLink key={item.id} item={item} active={item.id === currentPage} badge={badges[item.id]} />
             ))}
           </ul>
 
-          <div className="mx-2 my-3 border-t border-white/10" />
+          <div className="my-5 h-px bg-slate-100 dark:bg-slate-800" aria-hidden="true" />
 
+          <SectionLabel>Tizim</SectionLabel>
           <ul className="space-y-1">
             {secondaryNav.map((item) => (
               <NavLink key={item.id} item={item} active={item.id === currentPage} />
@@ -167,8 +204,8 @@ export function Sidebar({ currentPage }: SidebarProps) {
           </ul>
         </nav>
 
-        <div className="p-3">
-          <PromoCard />
+        <div className="py-3 pl-5 pr-3">
+          <QuoteCard />
         </div>
       </aside>
     </>

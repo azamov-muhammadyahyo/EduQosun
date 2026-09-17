@@ -85,11 +85,11 @@ export function RecentLessons() {
                       {group?.name ?? '—'}
                     </span>
                   </td>
-                  <td className="px-3 py-3">
+                  <td className="w-full max-w-0 px-3 py-3">
                     <div className="flex min-w-0 items-center gap-2.5">
-                      {group ? <GroupTile icon={group.icon} color={group.color} size="sm" className="hidden md:inline-flex" /> : null}
-                      <div className="min-w-0">
-                        <p className="line-clamp-1 font-medium text-slate-800 dark:text-slate-100">{lesson.topic}</p>
+                      {group ? <GroupTile icon={group.icon} color={group.color} size="sm" className="hidden shrink-0 md:inline-flex" /> : null}
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate font-medium text-slate-800 dark:text-slate-100">{lesson.topic}</p>
                         <p className="mt-0.5 truncate text-xs text-slate-400">
                           {group?.subject}
                           {phase === 'held' ? (record ? ` · ${came}/${summary.total} keldi` : ' · davomat olinmagan') : ''}

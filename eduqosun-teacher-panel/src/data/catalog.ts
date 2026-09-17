@@ -113,3 +113,12 @@ export const quotes = [
   { title: "O'rgatish — ikki marta o'rganish.", subtitle: 'Sabr va izchillik — muvaffaqiyat kaliti.' },
   { title: "Har bir o'quvchi — alohida olam.", subtitle: "E'tibor va mehr — eng yaxshi metodika." },
 ] as const
+
+/** Sidebar pastidagi qisqa iqtiboslar (birinchisi — dizayndagi) */
+export const sidebarQuotes = [
+  'Bilim – eng yaxshi investitsiya.',
+  'Bugungi mehnat – ertangi natija.',
+  "O'rgatish – ikki marta o'rganish.",
+  "Har bir o'quvchi – alohida olam.",
+  'Sabr va izchillik – muvaffaqiyat kaliti.',
+] as const

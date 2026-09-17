@@ -6,7 +6,7 @@ import { addDays, dateKeyOfIso } from '../lib/date'
 import { percent } from '../lib/format'
 import { matchesQuery } from '../lib/text'
 import { rosterBreakdown } from '../domain/students'
-import { useMediaQuery } from '../hooks/useDom'
+import { useMediaQuery, useStickyRail } from '../hooks/useDom'
 import { useRoute, navigate, navigateTo } from '../router'
 import { useApp } from '../store/appStore'
 import { useClock } from '../store/clock'
@@ -36,6 +36,7 @@ const sortOptions: { value: SortKey; label: string }[] = [
 ]
 
 export function GroupsPage() {
+  const railRef = useStickyRail()
   const groups = useApp((s) => s.groups)
   const students = useApp((s) => s.students)
   const { today } = useClock()
@@ -275,7 +276,7 @@ export function GroupsPage() {
         <GroupsInsights />
       </div>
 
-      <aside className="hidden min-[1440px]:block" aria-label="Guruh tafsilotlari">
+      <aside ref={railRef} className="hidden min-[1440px]:sticky-rail min-[1440px]:block" aria-label="Guruh tafsilotlari">
         {selected ? (
           <GroupDetailPanel group={selected} />
         ) : (

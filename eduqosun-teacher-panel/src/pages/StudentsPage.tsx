@@ -36,6 +36,7 @@ import { MetricCard } from '../components/ui/MetricCard'
 import { PageHeader } from '../components/ui/PageHeader'
 import { Pagination, paginate } from '../components/ui/Pagination'
 import { FilterPills, SegmentedControl } from '../components/ui/Tabs'
+import { useStickyRail } from '../hooks/useDom'
 
 type StatusFilter = StudentStatus | 'all'
 type SortKey = 'name' | 'score' | 'attendance' | 'grade' | 'newest'
@@ -53,6 +54,7 @@ const statusOrder: StatusFilter[] = ['active', 'all', 'left', 'transferred', 'gr
 const sortKeys = sortOptions.map((o) => o.value)
 
 export function StudentsPage() {
+  const railRef = useStickyRail()
   const students = useStudents()
   const metrics = useStudentMetrics()
   const groupMap = useGroupMap()
@@ -325,7 +327,7 @@ export function StudentsPage() {
         </Card>
       </div>
 
-      <aside aria-label="O'quvchilar tahlili">
+      <aside ref={railRef} className="min-[1440px]:sticky-rail" aria-label="O'quvchilar tahlili">
         <StudentsInsights students={inGroup} metrics={metrics} onShowAtRisk={() => setFilter({ status: null, risk: '1' })} />
       </aside>
 

@@ -246,6 +246,31 @@ export interface Test {
 
 export type ConversationKind = 'student' | 'parent' | 'group'
 
+/** Rasm | Video | Ovozli xabar | Audio | Fayl */
+export type AttachmentKind = 'photo' | 'video' | 'voice' | 'audio' | 'file'
+
+export interface ChatAttachment {
+  kind: AttachmentKind
+  /** Server manzili (/api/telegram/media/...) yoki yuborilayotgan paytda blob: manzil */
+  url: string
+  /** Rasm/video uchun kichik nusxa */
+  thumbUrl?: string
+  /** Telegramdagi xabar ID (albomda har bir faylning o'zi) */
+  tgId?: number
+  name?: string
+  mime?: string
+  size?: number
+  /** Soniya */
+  duration?: number
+  width?: number
+  height?: number
+  /** Ovozli xabar to'lqini: 0–31 */
+  waveform?: number[]
+}
+
+/** Yuborilmoqda | Yuborilmadi (belgilanmagan — yuborilgan) */
+export type MessageStatus = 'sending' | 'failed'
+
 export interface ChatMessage {
   id: string
   from: 'me' | 'them'
@@ -255,6 +280,30 @@ export interface ChatMessage {
   sentAt: string
   /** Mening xabarim qabul qiluvchi tomonidan o'qilganmi */
   read: boolean
+  attachments?: ChatAttachment[]
+  status?: MessageStatus
+  /** Yuborilmagan bo'lsa — sababi */
+  error?: string
+  editedAt?: string
+  /** Telegramdagi xabar ID'lari (albom bir nechta xabardan iborat) */
+  tgIds?: number[]
+  albumId?: string
+}
+
+export type TelegramVisibility = 'private' | 'public'
+
+/** Telegram chat turi: oddiy guruh | supergroup | kanal | shaxsiy chat */
+export type TelegramChatType = 'group' | 'supergroup' | 'channel' | 'user'
+
+/** Suhbat Telegramdagi qaysi chatga ulangani */
+export interface TelegramLink {
+  chatType: TelegramChatType
+  title: string
+  username: string | null
+  inviteLink: string | null
+  visibility: TelegramVisibility
+  membersCount: number | null
+  linkedAt: string
 }
 
 export interface Conversation {
@@ -268,6 +317,8 @@ export interface Conversation {
   pinned: boolean
   unread: number
   messages: ChatMessage[]
+  /** Telegramga ulangan bo'lsa — xabarlar u orqali yuboriladi va keladi */
+  telegram?: TelegramLink
 }
 
 /* ———————————————————————— Eslatmalar ———————————————————————— */

@@ -30,6 +30,7 @@ import { MetricCard } from '../components/ui/MetricCard'
 import { PageHeader } from '../components/ui/PageHeader'
 import { PanelHeader } from '../components/ui/PanelHeader'
 import { SegmentedControl } from '../components/ui/Tabs'
+import { useStickyRail } from '../hooks/useDom'
 
 const periodLabel: Record<StatsPeriod, string> = { '30': '30 kun', '90': '3 oy', '180': '6 oy' }
 
@@ -40,6 +41,7 @@ function trendOf(value: number | null, suffix: string): MetricTrend | undefined 
 }
 
 export function StatisticsPage() {
+  const railRef = useStickyRail()
   const groups = useApp((s) => s.groups)
   const students = useApp((s) => s.students)
   const attendance = useApp((s) => s.attendance)
@@ -221,7 +223,7 @@ export function StatisticsPage() {
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)] xl:items-start">
         <GroupComparison rows={groupRows} />
-        <div className="grid content-start gap-6 md:grid-cols-2 xl:grid-cols-1">
+        <div ref={railRef} className="grid content-start gap-6 md:grid-cols-2 xl:sticky-rail xl:grid-cols-1">
           <Card className="p-5">
             <PanelHeader title="O'quvchilar tarkibi" icon={ChartPie} subtitle={`Jami ${breakdown.total} ta yozuv`} />
             <div className="mt-4 flex items-center gap-5">

@@ -52,12 +52,14 @@ import { IconButton } from '../components/ui/IconButton'
 import { PageHeader } from '../components/ui/PageHeader'
 import { LessonPhaseBadge } from '../components/ui/StatusBadges'
 import { SegmentedControl } from '../components/ui/Tabs'
+import { useStickyRail } from '../hooks/useDom'
 
 type Mode = 'roll' | 'month'
 
 const UNMARKED_WINDOW_DAYS = 14
 
 export function AttendancePage() {
+  const railRef = useStickyRail()
   const groups = useApp((s) => s.groups)
   const students = useApp((s) => s.students)
   const attendance = useApp((s) => s.attendance)
@@ -360,7 +362,7 @@ export function AttendancePage() {
             )}
           </Card>
 
-          <aside className="space-y-6">
+          <aside ref={railRef} className="space-y-6 xl:sticky-rail">
             <AttendanceSummary
               summary={summary}
               rosterSize={roster.length}

@@ -135,3 +135,30 @@ export function usePrevious<T>(value: T): T | undefined {
   }, [value])
   return ref.current
 }
+
+const RAIL_TOP = 88
+const RAIL_GAP = 16
+
+/**
+ * O'ng panel uchun `sticky-rail` bilan birga ishlatiladi.
+ * Panel ekranga sig'sa — topbar ostida qotadi; baland bo'lsa — pastki cheti ekran tagiga yetganda qotadi.
+ */
+export function useStickyRail<T extends HTMLElement = HTMLElement>(): (node: T | null) => void {
+  const [node, setNode] = useState<T | null>(null)
+  useEffect(() => {
+    if (!node) return undefined
+    const update = () => {
+      const top = Math.min(RAIL_TOP, window.innerHeight - node.offsetHeight - RAIL_GAP)
+      node.style.setProperty('--rail-top', `${top}px`)
+    }
+    update()
+    const observer = new ResizeObserver(update)
+    observer.observe(node)
+    window.addEventListener('resize', update)
+    return () => {
+      observer.disconnect()
+      window.removeEventListener('resize', update)
+    }
+  }, [node])
+  return setNode
+}

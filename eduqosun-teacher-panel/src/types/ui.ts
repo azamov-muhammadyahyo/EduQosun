@@ -41,6 +41,9 @@ export type ModalState =
   | { type: 'test-builder'; testId?: string; groupId?: string }
   | { type: 'test-preview'; testId: string }
   | { type: 'compose'; target?: ComposeTarget; text?: string }
+  /** Telegram guruhi yoki o'quvchi bilan yangi suhbat (conversationId — mavjud suhbatni ulash) */
+  | { type: 'new-chat'; kind?: ConversationKind; conversationId?: string }
+  | { type: 'telegram-connect' }
   | { type: 'reminder-form'; reminderId?: string; date?: DateKey }
   | { type: 'assessment-form'; groupId: string; assessmentId?: string }
   | { type: 'random-picker'; groupId?: string }

@@ -19,6 +19,7 @@ import { MetricCard } from '../components/ui/MetricCard'
 import { PageHeader } from '../components/ui/PageHeader'
 import { Pagination, paginate } from '../components/ui/Pagination'
 import { FilterPills } from '../components/ui/Tabs'
+import { useStickyRail } from '../hooks/useDom'
 
 type StatusFilter = 'all' | 'active' | 'review' | 'overdue' | 'closed'
 type SortKey = 'due' | 'newest' | 'pending'
@@ -43,6 +44,7 @@ function matchesStatus(item: AssignmentItem, filter: StatusFilter, now: Date): b
 }
 
 export function TasksPage() {
+  const railRef = useStickyRail()
   const assignments = useApp((s) => s.assignments)
   const submissions = useApp((s) => s.submissions)
   const students = useApp((s) => s.students)
@@ -197,7 +199,7 @@ export function TasksPage() {
         </Card>
       </div>
 
-      <aside aria-label="Tekshirish navbati">
+      <aside ref={railRef} className="xl:sticky-rail" aria-label="Tekshirish navbati">
         <ReviewQueue
           assignments={groupId === 'all' ? assignments : assignments.filter((a) => a.groupId === groupId)}
           submissions={submissions}

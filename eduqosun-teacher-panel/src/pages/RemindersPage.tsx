@@ -23,6 +23,7 @@ import { MiniCalendar } from '../components/ui/MiniCalendar'
 import { PageHeader } from '../components/ui/PageHeader'
 import { PanelHeader } from '../components/ui/PanelHeader'
 import { FilterPills } from '../components/ui/Tabs'
+import { useStickyRail } from '../hooks/useDom'
 
 type CategoryFilter = ReminderCategory | 'all'
 type PriorityFilter = ReminderPriority | 'all'
@@ -41,6 +42,7 @@ function byTime(a: Reminder, b: Reminder): number {
 }
 
 export function RemindersPage() {
+  const railRef = useStickyRail()
   const reminders = useApp((s) => s.reminders)
   const groupMap = useGroupMap()
   const { now, today } = useClock()
@@ -264,7 +266,7 @@ export function RemindersPage() {
         </Card>
       </div>
 
-      <aside className="space-y-6" aria-label="Eslatmalar taqvimi">
+      <aside ref={railRef} className="space-y-6 xl:sticky-rail" aria-label="Eslatmalar taqvimi">
         <Card className="p-5">
           <PanelHeader title="Taqvim" icon={CalendarCheck2} subtitle="Kunni tanlang — shu kun eslatmalari chiqadi" />
           <MiniCalendar

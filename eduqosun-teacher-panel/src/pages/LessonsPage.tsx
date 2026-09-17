@@ -34,11 +34,13 @@ import { Card } from '../components/ui/Card'
 import { PageHeader } from '../components/ui/PageHeader'
 import { PanelHeader } from '../components/ui/PanelHeader'
 import { SegmentedControl } from '../components/ui/Tabs'
+import { useStickyRail } from '../hooks/useDom'
 
 const views: LessonsView[] = ['day', 'week', 'month', 'list']
 
 /** Darslarim: kunlik / haftalik / oylik jadval va darslar ro'yxati */
 export function LessonsPage() {
+  const railRef = useStickyRail()
   const { today, minutes } = useClock()
   const { query } = useRoute()
   const rawDate = query.get('date') ?? ''
@@ -203,7 +205,7 @@ export function LessonsPage() {
         </Card>
       </div>
 
-      <div className="print-hidden grid content-start gap-6 md:grid-cols-2 xl:grid-cols-1">
+      <div ref={railRef} className="print-hidden grid content-start gap-6 md:grid-cols-2 xl:sticky-rail xl:grid-cols-1">
         <TodayLessonsWidget date={date} onSelect={setDate} lessons={dayLessons} groupMap={groupMap} weekCounts={weekCounts} />
         <LessonsDonut plan={plan} label={weekStart <= today && today <= weekEnd ? 'Bu haftada' : formatWeekRange(date)} />
         <QuickButtons />
